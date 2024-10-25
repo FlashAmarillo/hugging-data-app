@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState, ChangeEvent } from 'react'
+import { useState, ChangeEvent, FormEvent } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -34,10 +34,12 @@ export default function Register() {
     });
   }
 
-  const handleRegister = () => {
+  const handleRegister = (e: FormEvent) => {
+    e.preventDefault()
+
     // Validaciones de los campos, como verificar si las contraseñas coinciden
     if (createUser.password !== createUser.confirmPassword) {
-      alert('Passwords do not match!');
+      alert('Passwords do not match!')
       return;
     }
 
@@ -49,12 +51,12 @@ export default function Register() {
       name: createUser.name,
       email: createUser.email,
       password: createUser.password
-    });
+    })
 
     // Guardar el nuevo arreglo de usuarios en el localStorage
-    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem('users', JSON.stringify(users))
 
-    alert('Registered successfully! Please log in.');
+    alert('Registered successfully! Please log in.')
 
     // Redirigir a la página principal para iniciar sesión
     router.push('/')
@@ -79,7 +81,7 @@ export default function Register() {
           
           <form 
             className="my-10 bg-white border-gray-200 border shadow-2xl rounded-xl p-10"
-            // onSubmit={handleSubmit}
+            onSubmit={handleRegister}
           >
             <div className="my-5 ">
               <Label 
@@ -148,7 +150,6 @@ export default function Register() {
             <Button
               type="submit"
               className="bg-slate-900 w-full mb-5 py-3 text-white uppercase font-bold rounded-xl hover:cursor-pointer hover:bg-sky-900 transition-colors"
-              onClick={handleRegister}
             >Create account</Button>
 
           </form>

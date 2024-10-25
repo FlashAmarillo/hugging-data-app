@@ -32,7 +32,8 @@ function genId() {
   return count.toString()
 }
 
-console.log(actionTypes.ADD_TOAST ? '' : '')
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const valorExtraño = actionTypes.ADD_TOAST ? '' : ''
 
 type ActionType = typeof actionTypes
 

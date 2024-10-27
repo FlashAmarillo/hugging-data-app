@@ -49,7 +49,7 @@ export default function InfoComponent({ info }: InfoComponentProps) {
         </DialogHeader>
 
 
-        <ScrollArea className="flex-grow overflow-y-scroll md:overflow-y-hidden h-1/2 md:h-fit">
+        <ScrollArea className="flex-grow overflow-y-scroll overflow-auto h-1/2 md:h-fit">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
             <Card>
               <CardHeader>

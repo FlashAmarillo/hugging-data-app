@@ -1,77 +1,94 @@
 'use client'
+
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState, ChangeEvent, FormEvent } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 import PublicRoute from '../PublicRoute'
-// import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+
+const formSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters."}).max(50),
+  email: z.string().email(),
+  password: z.string().min(8, { message: "Password must be at least 8 characters."}).max(50),
+  confirmPassword: z.string().min(8, { message: "Password must be at least 8 characters.", }).max(50)
+}).refine((data) => (data.password === data.confirmPassword),{
+  message: "Both passwords must be the same",
+  path: ["confirmPassword"]
+})
+
 
 export default function Register() {
 
   const router = useRouter()
-  // const { toast } = useToast()
+  const { toast } = useToast()
 
-  type newAccount = {
-    name: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-  }
-
-  const [createUser, setCreateUser] = useState<newAccount>({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
   })
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setCreateUser({
-        ...createUser,
-        [e.target.name]: e.target.value
-    });
-  }
-
-  const handleRegister = (e: FormEvent) => {
-    e.preventDefault()
-
-    // Validaciones de los campos, como verificar si las contraseñas coinciden
-    if (createUser.password !== createUser.confirmPassword) {
-      alert('Passwords do not match!')
-      return;
-    }
+  function onSubmit(values: z.infer<typeof formSchema>) {
 
     // Obtener el arreglo de usuarios del localStorage
     const users: User[] = JSON.parse(localStorage.getItem('users') || '[]')
 
+    // Verificar si el usuario ya existe
+    const userExists = users.some(user =>
+      user.name === values.name &&
+      user.email === values.email &&
+      user.password === values.password
+    )
+
+    if (userExists) {
+      toast({
+        title: "User already registered",
+        description: (
+          <span>
+            This user has already been registered.{' '}
+            <Link href="/" className="underline text-blue-500">Sign in here</Link>.
+          </span>
+        ),
+        duration: 3500
+      })
+      form.reset()
+      return // No continuar con el registro
+    }
+
     // Añadir el nuevo usuario al arreglo
     users.push({
-      name: createUser.name,
-      email: createUser.email,
-      password: createUser.password
+      name: values.name,
+      email: values.email,
+      password: values.password
     })
 
     // Guardar el nuevo arreglo de usuarios en el localStorage
     localStorage.setItem('users', JSON.stringify(users))
 
-    alert('Registered successfully! Please log in.')
-
-    // Redirigir a la página principal para iniciar sesión
     router.push('/')
 
-    // TODO: disparamos un toast para notificar que se ha creado la cuenta
-    // toast({
-    //   title: "Congratulations! you have created your account",
-    //   description: "Enjoy the app",
-    // })
   }
 
   return (
     <PublicRoute>
 
-      <main className="container mx-auto mt-5 md:mt-12 p-5 md:flex md:justify-center">
+      <main className="container mx-auto mt-5 md:mt-12 md:flex md:justify-center">
         
         <div className='md:w-3/4 lg:w-3/5'>
         
@@ -79,80 +96,77 @@ export default function Register() {
             className="text-teal-600 font-black text-2xl md:text-4xl capitalize"
           >Create your account and manage your {' '}<span className="text-emerald-950">projects and data</span></h1>
           
-          <form 
-            className="my-10 bg-white border-gray-200 border shadow-2xl rounded-xl p-10"
-            onSubmit={handleRegister}
-          >
-            <div className="my-5 ">
-              <Label 
-                className="uppercase text-gray-600 block text-lg font-bold"
-                htmlFor="nombre"
-              >Name</Label>
-              <Input 
-                id="name"
-                type="text"
-                name='name'
-                placeholder="Your name"
-                className="border border-gray-300 placeholder:text-gray-500 rounded-xl bg-gray-50 h-12"
-                value={createUser.name}
-                onChange={handleChange}
+          
+          <Form {...form}>
+            <form 
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="my-10 bg-white border-gray-200 border shadow-2xl rounded-xl p-10"
+            >
+
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className='my-4'>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input id='name' type='text' placeholder="Your name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="my-5 ">
-              <Label 
-                className="uppercase text-gray-600 block text-lg font-bold"
-                htmlFor="email"
-              >Email</Label>
-              <Input 
-                id="email"
-                type="email"
-                name='email'
-                placeholder="Email address"
-                className="border border-gray-300 placeholder:text-gray-500 rounded-xl bg-gray-50 h-12"
-                value={createUser.email}
-                onChange={handleChange}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className='my-4'>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type='email' placeholder="Email address" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="my-5 ">
-              <Label 
-                className="uppercase text-gray-600 block text-lg font-bold"
-                htmlFor="password"
-              >Password</Label>
-              <Input 
-                id="password"
-                type="password"
-                name='password'
-                placeholder="Password"
-                className="border border-gray-300 placeholder:text-gray-500 rounded-xl bg-gray-50 h-12"
-                value={createUser.password}
-                onChange={handleChange}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem className='my-4'>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type='password' placeholder="Password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+
+                )}
               />
-            </div>
 
-            <div className="my-5 ">
-              <Label 
-                className="uppercase text-gray-600 block text-lg font-bold"
-                htmlFor="password2"
-              >Repeat Password</Label>
-              <Input 
-                id="password2"
-                type="password"
-                name='confirmPassword'
-                placeholder="Repeat your Password"
-                className="border border-gray-300 placeholder:text-gray-500 rounded-xl bg-gray-50 h-12"
-                value={createUser.confirmPassword}
-                onChange={handleChange}
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem className='my-4'>
+                    <FormLabel>Repeat Password</FormLabel>
+                    <FormControl>
+                      <Input type='password' placeholder="Repeat your Password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <Button
-              type="submit"
-              className="bg-slate-900 w-full mb-5 py-3 text-white uppercase font-bold rounded-xl hover:cursor-pointer hover:bg-sky-900 transition-colors"
-            >Create account</Button>
+              <Button 
+                className="bg-slate-900 w-full mb-5 py-3 text-white uppercase font-bold rounded-xl hover:cursor-pointer hover:bg-sky-900 transition-colors"
+                type="submit"
+              >Create Account</Button>
 
-          </form>
+            </form>
+          </Form>
 
           <nav className="lg:flex lg:justify-between ">
             <Link

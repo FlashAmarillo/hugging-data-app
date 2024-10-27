@@ -41,12 +41,15 @@ export default function Header({
   const handleLogout = ():void => {
 
     // Eliminar datos de la sesión de localStorage
-  localStorage.removeItem('isLoggedIn')
-  localStorage.removeItem('loggedInUser')
+    localStorage.removeItem('isLoggedIn')
+    localStorage.removeItem('loggedInUser')
 
     // Redirigir a la página de inicio
     router.push('/')
   }
+
+  //TODO: ARREGLAR LA LUZ VERDE ARRIBA DE LAS NOTIFICACIONES
+  //TODO: añadir modo oscuro
 
   return (
     <header className="border-b border-gray-100">

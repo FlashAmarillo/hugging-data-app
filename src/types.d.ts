@@ -1,4 +1,9 @@
 
+type Credentials = {
+  email: string;
+  password: string;
+}
+
 interface User {
   name: string;
   email: string;

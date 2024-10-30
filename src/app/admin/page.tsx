@@ -2,9 +2,6 @@
 
 import { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
-// import CsvUploader from '@/components/CsvUploader'
-// import DataTable from '@/components/DataTable'
-import { columns } from '@/components/Columns'
 import { analizarSentimiento, analizarEmocion } from './fetchData'
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -15,59 +12,134 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { generateColumns } from '@/components/Columns'
+import { ColumnDef } from '@tanstack/react-table'
 
-const CsvUploader = dynamic(() => import('@/components/CsvUploader'), { ssr: false })
-const DataTable = dynamic(() => import('@/components/DataTable'), { ssr: false })
+const CsvUploader = dynamic(() => import('@/components/CsvUploader'))
+const DataTable = dynamic(() => import('@/components/DataTable'))
 
 export default function AdminPage() {
 
   const [data, setData] = useState<CsvRow[]>([])
+  const [headers, setHeaders] = useState<ColumnDef<CsvRowResponse>[]>([])
   const [processedData, setProcessedData] = useState<CsvRowResponse[]>([])
   const [isProcessing, setIsProcessing] = useState<boolean>(false)
   const [progress, setProgress] = useState(0)
-  const [isCancelled, setIsCancelled] = useState<boolean>(false)
+  // const [isCancelled, setIsCancelled] = useState<boolean>(false)
   const abortControllerRef = useRef<AbortController | null>(null)
   const [numberProcessData, setNumberProcessData] = useState<number>(0)
   
-  // const loggedInUser: LoggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}')
-
-  const handleDataLoaded = (loadedData: CsvRow[]) => {
+  // funcion para guardar la informacion de los encabezados y los datos en el estado
+  const handleDataLoaded = (loadedData: CsvRow[], loadedHeaders: string[]) => {
+    setHeaders(generateColumns(loadedHeaders))
     setData(loadedData)
   }
 
+  // vieja forma de hacer las peticiones 1 por 1
+  // const processData = async () => {
+  //   setIsProcessing(true)
+  //   setIsCancelled(false)
+  //   const processed = []
+  //   abortControllerRef.current = new AbortController()
+
+  //   try {
+  //     const toProcess = numberProcessData === data.length ? data : data.slice(0, numberProcessData)
+  //     for (let i = 0; i < toProcess.length; i++) {
+  //       if (isCancelled) {
+  //         break
+  //       }
+  //       const row = toProcess[i]
+  //       const sentimiento = await analizarSentimiento(row.text, abortControllerRef.current.signal)
+  //       const emocion = await analizarEmocion(row.text, abortControllerRef.current.signal)
+  //       const processedRow = { ...row, sentimiento, emocion }
+  //       processed.push(processedRow)
+  //       setProgress(((i + 1) / data.length) * 100)
+  //     }
+  //   } catch (error) {
+  //     if (error instanceof DOMException && error.name === 'AbortError') {
+  //       console.log('Processing was aborted')
+  //     } else {
+  //       console.error('Processing cancelled or failed:', error)
+  //     }
+  //   }
+  //   setProcessedData(processed)
+  //   setIsProcessing(false)
+
+  // }
+
   const processData = async () => {
-    
     setIsProcessing(true)
-    setIsCancelled(false)
-    const processed = []
+    // setIsCancelled(false)
+    setProgress(0)
     abortControllerRef.current = new AbortController()
 
     try {
+      // Seleccionar los datos a procesar
       const toProcess = numberProcessData === data.length ? data : data.slice(0, numberProcessData)
-      for (let i = 0; i < toProcess.length; i++) {
-        if (isCancelled) {
-          break
-        }
-        const row = toProcess[i]
-        const sentimiento = await analizarSentimiento(row.text, abortControllerRef.current.signal)
-        const emocion = await analizarEmocion(row.text, abortControllerRef.current.signal)
-        const processedRow = { ...row, sentimiento, emocion }
-        processed.push(processedRow)
-        setProgress(((i + 1) / data.length) * 100)
-      }
+      
+      // Crear arrays de promesas para sentimientos y emociones
+      const sentimientosPromises = toProcess.map(row => 
+        analizarSentimiento(row.text, abortControllerRef.current!.signal)
+      )
+      
+      const emocionesPromises = toProcess.map(row => 
+        analizarEmocion(row.text, abortControllerRef.current!.signal)
+      )
+
+      // Contador para el progreso
+      let completedRequests = 0
+      const totalRequests = toProcess.length * 2 // Total de peticiones (sentimientos + emociones)
+
+      // Crear un array de promesas con el manejo de progreso
+      const allPromises = [...sentimientosPromises, ...emocionesPromises].map(promise =>
+        promise.then(result => {
+          completedRequests++
+          setProgress((completedRequests / totalRequests) * 100)
+          return result
+        })
+      )
+
+      // Esperar a que todas las peticiones terminen
+      const results = await Promise.all(allPromises)
+
+      // Separar los resultados
+      const sentimientos = results.slice(0, toProcess.length)
+      const emociones = results.slice(toProcess.length)
+
+      // Combinar los resultados con los datos originales
+      const processed = toProcess.map((row, index) => ({
+        ...row,
+        sentimiento: sentimientos[index],
+        emocion: emociones[index]
+      }))
+
+      setProcessedData(processed)
+      console.log({
+        title: "Processing complete",
+        description: `Successfully processed ${processed.length} entries.`,
+      })
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
         console.log('Processing was aborted')
+        console.log({
+          title: "Processing cancelled",
+          description: "The operation was cancelled by the user.",
+        })
       } else {
-        console.error('Processing cancelled or failed:', error)
+        console.error('Processing failed:', error)
+        console.log({
+          variant: "destructive",
+          title: "Processing failed",
+          description: "An unexpected error occurred. Please try again.",
+        })
       }
+    } finally {
+      setIsProcessing(false)
     }
-    setProcessedData(processed)
-    setIsProcessing(false)
   }
 
   const cancelProcessing = () => {
-    setIsCancelled(true)
+    // setIsCancelled(true)
     abortControllerRef.current?.abort()
   }
 
@@ -124,7 +196,7 @@ export default function AdminPage() {
           <h2 className="text-xl font-semibold mb-4">Results</h2>
           <DataTable 
             data={processedData}
-            columns={columns} 
+            columns={headers} 
           />
         </div>
       )}

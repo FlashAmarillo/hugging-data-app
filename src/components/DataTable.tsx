@@ -1,11 +1,14 @@
 'use client'
 
-import dynamic from 'next/dynamic'
+// import dynamic from 'next/dynamic'
+import { useState } from 'react'
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
+  SortingState,
+  getSortedRowModel,
 } from "@tanstack/react-table"
 import {
   Table,
@@ -15,9 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-
-const InfoComponent = dynamic(() => import('@/components/InfoComponent'), { ssr: false })
-
 
 interface ResultsTableProps<TData, TValue> {
   data: TData[],
@@ -29,22 +29,33 @@ export default function DataTable<TData extends CsvRowResponse, TValue>({
   columns
 }: ResultsTableProps<TData, TValue>) {
   
+  const [sorting, setSorting] = useState<SortingState>([])
+
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowModel()
+    getCoreRowModel: getCoreRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
   })
 
-  
   return (
     <div className="rounded-md border">
       <Table>
+        
         <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => {
               return (
-                <TableHead key={header.id} className='font-semibold text-center'>
+                <TableHead 
+                  key={header.id}
+                  className='font-semibold text-center'
+                  style={{ width: header.column.columnDef.size }}
+                  >
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -57,38 +68,29 @@ export default function DataTable<TData extends CsvRowResponse, TValue>({
           </TableRow>
         ))}
         </TableHeader>
+
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
-                key={row.id}
+                key={row?.id}
                 data-state={row.getIsSelected() && "selected"}
               >
-                {row.getVisibleCells().map((cell) => {
-                  if(cell.column.columnDef?.header === 'Results') {
-                    return (
-                      <TableCell key={cell.id}>
-                        <InfoComponent info={cell.row.original} />
-                      </TableCell>
-                    )
-                  } else {
-                    return(
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef?.cell ?? '',
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    )
-                  }
-                })}
+                {row.getVisibleCells().map((cell) =>(
+                  <TableCell key={cell.id}>
+                    {flexRender(
+                      cell?.column?.columnDef?.cell ?? '',
+                      cell.getContext()
+                    )}
+                  </TableCell>
+                ))}
               </TableRow>
             ))
       ) : (
             <TableRow>
               <TableCell
                 colSpan={columns.length}
-                className="h-24 text-center"
+                className="h-24"
               >
                 No results.
               </TableCell>

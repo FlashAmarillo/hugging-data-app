@@ -40,6 +40,7 @@ interface Sentimiento {
 }
 
 type CsvRowResponse = {
+  [key: string]: string;
   text: string
   likes: string
   comments: string
@@ -48,3 +49,4 @@ type CsvRowResponse = {
   sentimiento?: Sentimiento[]
   emocion?: Emocion[]
 }
+

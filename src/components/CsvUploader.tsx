@@ -6,21 +6,21 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface CsvUploaderProps {
-  onDataLoaded: (data: CsvRow[]) => void;
+  onDataLoaded: (data: CsvRow[], header: string[]) => void;
 }
 
 export default function CsvUploader({ onDataLoaded }: CsvUploaderProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const file = event.target?.files?.[0]
     if (file) {
       setIsLoading(true)
       Papa.parse(file, {
         complete: (result) => {
-          // const headers = result.meta.fields as string[]
-          const data = result.data as CsvRow[]
-          onDataLoaded(data)
+          const headers = result?.meta?.fields as string[]
+          const data = result?.data as CsvRow[]
+          onDataLoaded(data, headers)
           setIsLoading(false)
         },
         header: true

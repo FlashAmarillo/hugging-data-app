@@ -9,7 +9,7 @@ export const analizarSentimiento = async (text: string, signal: AbortSignal) => 
       'Content-type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'finiteautomata/beto-sentiment-analysis',
+      model: 'pysentimiento/robertuito-sentiment-analysis',
       inputs: text
     }),
     signal

@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import type { User } from '@/types'
 
 const formSchema = z.object({
   email: z.string().email({message: "You must provide a valid email address"}),

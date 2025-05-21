@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { HfInference } from '@huggingface/inference'
+import { InferenceClient } from '@huggingface/inference';
 
-const hf = new HfInference(process.env.NEXT_PUBLIC_HUGGINGFACE_API_TOKEN)
+const hf = new InferenceClient(process.env.NEXT_PUBLIC_HUGGINGFACE_API_TOKEN)
 
 export async function POST(request: NextRequest) {
   const {inputs, model}  = await request.json()

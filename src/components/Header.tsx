@@ -14,6 +14,7 @@ import {
   AvatarFallback,
   AvatarImage
 } from "@/components/ui/avatar"
+import type { LoggedInUser, NotificationEntry } from '@/types'
 
   
 export default function Header({

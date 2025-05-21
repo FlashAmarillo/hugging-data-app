@@ -3,11 +3,11 @@
 // import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import {
-  ColumnDef,
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
-  SortingState,
+  type SortingState,
   getSortedRowModel,
 } from "@tanstack/react-table"
 import {
@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import type { CsvRowResponse } from '@/types'
 
 interface ResultsTableProps<TData, TValue> {
   data: TData[],

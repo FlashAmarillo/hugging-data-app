@@ -1,8 +1,10 @@
 
 
 import dynamic from 'next/dynamic'
-import { ColumnDef, Row } from "@tanstack/react-table"
+import type { ColumnDef, Row } from "@tanstack/react-table"
+import type { CsvRowResponse } from '@/types'
 const InfoComponent = dynamic(() => import('./InfoComponent'), { ssr: false })
+
 
 
 // Función auxiliar para formatear el header
@@ -15,7 +17,7 @@ function formatHeaderText(header: string): string {
 
 // Componente para la celda de resultados
 function ResultCell({ row }: { row: Row<CsvRowResponse> }) {
-  const hasResults = row.original?.sentimiento || row.original?.emocion
+  const hasResults = row?.original?.sentimiento || row?.original?.emocion
   if (!hasResults) return null
 
   return (

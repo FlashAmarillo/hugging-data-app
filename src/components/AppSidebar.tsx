@@ -26,6 +26,7 @@ import {
   AvatarImage
 } from "@/components/ui/avatar"
 import { ChevronUp, LayoutDashboard, Cookie, MessageSquare } from "lucide-react"
+import type { LoggedInUser } from '@/types'
 
 export default function AppSidebar() {
 

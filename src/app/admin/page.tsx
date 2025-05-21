@@ -13,7 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { generateColumns } from '@/components/Columns'
-import { ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
+import type { CsvRow, CsvRowResponse } from '@/types'
 
 const CsvUploader = dynamic(() => import('@/components/CsvUploader'))
 const DataTable = dynamic(() => import('@/components/DataTable'))
@@ -34,38 +35,6 @@ export default function AdminPage() {
     setHeaders(generateColumns(loadedHeaders))
     setData(loadedData)
   }
-
-  // vieja forma de hacer las peticiones 1 por 1
-  // const processData = async () => {
-  //   setIsProcessing(true)
-  //   setIsCancelled(false)
-  //   const processed = []
-  //   abortControllerRef.current = new AbortController()
-
-  //   try {
-  //     const toProcess = numberProcessData === data.length ? data : data.slice(0, numberProcessData)
-  //     for (let i = 0; i < toProcess.length; i++) {
-  //       if (isCancelled) {
-  //         break
-  //       }
-  //       const row = toProcess[i]
-  //       const sentimiento = await analizarSentimiento(row.text, abortControllerRef.current.signal)
-  //       const emocion = await analizarEmocion(row.text, abortControllerRef.current.signal)
-  //       const processedRow = { ...row, sentimiento, emocion }
-  //       processed.push(processedRow)
-  //       setProgress(((i + 1) / data.length) * 100)
-  //     }
-  //   } catch (error) {
-  //     if (error instanceof DOMException && error.name === 'AbortError') {
-  //       console.log('Processing was aborted')
-  //     } else {
-  //       console.error('Processing cancelled or failed:', error)
-  //     }
-  //   }
-  //   setProcessedData(processed)
-  //   setIsProcessing(false)
-
-  // }
 
   const processData = async () => {
     setIsProcessing(true)
@@ -101,6 +70,8 @@ export default function AdminPage() {
 
       // Esperar a que todas las peticiones terminen
       const results = await Promise.all(allPromises)
+
+      console.log(results)
 
       // Separar los resultados
       const sentimientos = results.slice(0, toProcess.length)

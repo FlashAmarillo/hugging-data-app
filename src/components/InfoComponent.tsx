@@ -11,6 +11,7 @@ import {
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import type { CsvRowResponse, Sentimiento, Emocion } from '@/types'
 
 interface InfoComponentProps {
   info: CsvRowResponse;
@@ -33,7 +34,49 @@ const getSentimentEmoji = (label: string) => {
   }
 }
 
+const isSentimientoArray = (data: unknown): data is Sentimiento[] => {
+  return Array.isArray(data) && data.length > 0 && 'label' in data[0] && 'score' in data[0];
+}
+
+const isEmocionArray = (data: unknown): data is Emocion[] => {
+  return Array.isArray(data) && data.length > 0 && 'label' in data[0] && 'score' in data[0];
+}
+
 export default function InfoComponent({ info }: InfoComponentProps) {
+  if (!info) return null;
+
+  const renderSentimientos = () => {
+    if (!info.sentimiento || !isSentimientoArray(info.sentimiento)) {
+      return <p>No hay datos de sentimiento disponibles</p>;
+    }
+
+    return info.sentimiento.map((sent: Sentimiento) => (
+      <div key={sent.label} className="mb-2">
+        <div className="flex justify-between mb-1">
+          <span>{sent.label} {getSentimentEmoji(sent.label)}</span>
+          <span>{(sent.score * 100).toFixed(2)}%</span>
+        </div>
+        <Progress value={sent.score * 100} className="w-full" />
+      </div>
+    ));
+  };
+
+  const renderEmociones = () => {
+    if (!info.emocion || !isEmocionArray(info.emocion)) {
+      return <p>No hay datos de emoción disponibles</p>;
+    }
+
+    return info.emocion.map((emo: Emocion) => (
+      <div key={emo.label} className="mb-2">
+        <div className="flex justify-between mb-1">
+          <span>{emo.label}</span>
+          <span>{(emo.score * 100).toFixed(2)}%</span>
+        </div>
+        <Progress value={emo.score * 100} className="w-full" />
+      </div>
+    ));
+  };
+
   return (
     <Dialog>
       <DialogTrigger
@@ -48,7 +91,6 @@ export default function InfoComponent({ info }: InfoComponentProps) {
           </DialogDescription>
         </DialogHeader>
 
-
         <ScrollArea className="flex-grow overflow-y-scroll overflow-auto h-1/2 md:h-fit">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
             <Card>
@@ -56,10 +98,12 @@ export default function InfoComponent({ info }: InfoComponentProps) {
                 <CardTitle>Stats</CardTitle>
               </CardHeader>
               <CardContent>
-                <p><strong>Likes:</strong> {formatNumber(info.likes)}</p>
-                <p><strong>Comments:</strong> {formatNumber(info.comments)}</p>
-                <p><strong>Shares:</strong> {formatNumber(info.shares)}</p>
-                <p><strong>Reactions Count:</strong> {formatNumber(info.reactions_count)}</p>
+                <p>
+                  <strong>Likes:</strong> {formatNumber(info.likes || '0')}
+                </p>
+                <p><strong>Comments:</strong> {formatNumber(info.comments || '0')}</p>
+                <p><strong>Shares:</strong> {formatNumber(info.shares || '0')}</p>
+                <p><strong>Reactions Count:</strong> {formatNumber(info.reactions_count || '0')}</p>
               </CardContent>
             </Card>
             <Card>
@@ -67,7 +111,7 @@ export default function InfoComponent({ info }: InfoComponentProps) {
                 <CardTitle>Analyzed Text</CardTitle>
               </CardHeader>
               <CardContent className="text-sm max-h-40 overflow-y-auto">
-                {info.text}
+                {info.text || 'No text available'}
               </CardContent>
             </Card>
             <Card>
@@ -75,15 +119,7 @@ export default function InfoComponent({ info }: InfoComponentProps) {
                 <CardTitle>Feelings</CardTitle>
               </CardHeader>
               <CardContent>
-                {info.sentimiento?.map((sent: Sentimiento) => (
-                  <div key={sent.label} className="mb-2">
-                    <div className="flex justify-between mb-1">
-                      <span>{sent.label} {getSentimentEmoji(sent.label)}</span>
-                      <span>{(sent.score * 100).toFixed(2)}%</span>
-                    </div>
-                    <Progress value={sent.score * 100} className="w-full" />
-                  </div>
-                ))}
+                {renderSentimientos()}
               </CardContent>
             </Card>
             <Card>
@@ -91,15 +127,7 @@ export default function InfoComponent({ info }: InfoComponentProps) {
                 <CardTitle>Emotion</CardTitle>
               </CardHeader>
               <CardContent>
-                {info.emocion?.map((emo: Emocion) => (
-                  <div key={emo.label} className="mb-2">
-                    <div className="flex justify-between mb-1">
-                      <span>{emo.label}</span>
-                      <span>{(emo.score * 100).toFixed(2)}%</span>
-                    </div>
-                    <Progress value={emo.score * 100} className="w-full" />
-                  </div>
-                ))}
+                {renderEmociones()}
               </CardContent>
             </Card>
           </div>

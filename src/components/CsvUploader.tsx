@@ -1,9 +1,10 @@
 'use client'
 
-import { ChangeEvent, useState } from 'react'
+import { type ChangeEvent, useState } from 'react'
 import Papa from 'papaparse'
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import type { CsvRow } from '@/types'
 
 interface CsvUploaderProps {
   onDataLoaded: (data: CsvRow[], header: string[]) => void;

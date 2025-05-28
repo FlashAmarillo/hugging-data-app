@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { InferenceClient } from '@huggingface/inference';
+import { InferenceClient } from '@huggingface/inference'
 
 const hf = new InferenceClient(process.env.NEXT_PUBLIC_HUGGINGFACE_API_TOKEN)
 
@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   const {inputs, model}  = await request.json()
   
   if (typeof inputs !== 'string') {
-    return NextResponse.json({ error: 'Invalid input type', details: 'Text must be a string' }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid input type', details: 'Text must be a string' }, { status: 400 })
   }
   try {
     const result = await hf.textClassification({

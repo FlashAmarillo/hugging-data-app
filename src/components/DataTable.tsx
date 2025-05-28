@@ -44,8 +44,8 @@ export default function DataTable<TData extends CsvRowResponse, TValue>({
   })
 
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="rounded-md border overflow-x-auto max-w-full">
+      <Table className="w-full table-fixed">
         
         <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
@@ -55,7 +55,7 @@ export default function DataTable<TData extends CsvRowResponse, TValue>({
                 <TableHead 
                   key={header.id}
                   className='font-semibold text-center'
-                  style={{ width: header.column.columnDef.size }}
+                  style={{ width: header.column.columnDef.size || 'auto', maxWidth: '100%' }}
                   >
                   {header.isPlaceholder
                     ? null
@@ -77,10 +77,20 @@ export default function DataTable<TData extends CsvRowResponse, TValue>({
                 key={row?.id}
                 data-state={row.getIsSelected() && "selected"}
               >
-                {row.getVisibleCells().map((cell) =>(
-                  <TableCell key={cell.id}>
+                {row.getVisibleCells().map((cell) => (
+                  
+                  <TableCell
+                    key={cell.id}
+                    className="break-words whitespace-normal"
+                    style={{ 
+                      width: 'auto',
+                      maxWidth: cell.column.columnDef.size || '200px',
+                      overflow: 'hidden',
+                      textAlign: cell.column.columnDef.header === 'Text' ? 'left' : 'center'
+                    }}
+                  >
                     {flexRender(
-                      cell?.column?.columnDef?.cell ?? '',
+                      cell.column.columnDef.cell ?? '',
                       cell.getContext()
                     )}
                   </TableCell>
@@ -91,7 +101,7 @@ export default function DataTable<TData extends CsvRowResponse, TValue>({
             <TableRow>
               <TableCell
                 colSpan={columns.length}
-                className="h-24"
+                className="h-24 text-center"
               >
                 No results.
               </TableCell>

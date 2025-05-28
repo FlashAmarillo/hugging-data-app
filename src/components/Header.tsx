@@ -54,8 +54,8 @@ export default function Header({
 
   return (
     <header className="border-b border-gray-100">
-      <div className="w-full pr-6 flex h-16 justify-between">
-        <div className="flex items-center w-10 h-auto px-4">
+      <div className="pr-6 flex h-16 justify-between">
+        <div className="flex items-center h-auto px-4">
           {children}
         </div>
         <div className="flex gap-6 items-center">
@@ -89,13 +89,13 @@ export default function Header({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-            <DropdownMenuItem>
-                <span>Profile</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={handleLogout}>
-                <span>Sign out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
+              <DropdownMenuItem>
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleLogout}>
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>

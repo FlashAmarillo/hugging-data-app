@@ -12,11 +12,11 @@ export default function Layout({
     <ProtectedRute>
       <SidebarProvider>
         <AppSidebar/>
-        <main className="flex min-h-dvh flex-col w-screen">
+        <main className="grid min-h-dvh grid-rows-[auto_1fr_auto] w-full overflow-x-hidden">
           <Header>
             <SidebarTrigger />
           </Header>
-          <div>
+          <div className="w-full overflow-x-hidden">
             {children}
           </div>
         </main>

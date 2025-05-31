@@ -108,7 +108,7 @@ export default function AppSidebar() {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton className='border border-gray-200'>
                   <Avatar className='h-5 w-5'>
-                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                    <AvatarImage src="https://i.pinimg.com/736x/fe/2b/33/fe2b3325ebaee961fa821480671c7919.jpg" alt="@shadcn" />
                     <AvatarFallback>{loggedInUser.name}</AvatarFallback>
                   </Avatar> 
                   {loggedInUser.name}

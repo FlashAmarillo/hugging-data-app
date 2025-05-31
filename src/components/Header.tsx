@@ -83,7 +83,7 @@ export default function Header({
               <Button variant={'outline'}>
                 {loggedInUser.name}
                 <Avatar className='h-7 w-7'>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                  <AvatarImage src="https://i.pinimg.com/736x/fe/2b/33/fe2b3325ebaee961fa821480671c7919.jpg" alt="@shadcn" />
                   <AvatarFallback>{loggedInUser.name}</AvatarFallback>
                 </Avatar>
               </Button>
